@@ -11,6 +11,7 @@ public class JuegoPanel extends JPanel {
     private Image fondoImage;
     private Image naveImage;
     private Image enemigoImage;
+    private Image obstaculoImage;
 
     public JuegoPanel(Juego modelo) {
         this.modelo = modelo;
@@ -24,11 +25,13 @@ public class JuegoPanel extends JPanel {
             fondoImage = ImageIO.read(getClass().getResourceAsStream("/recursos/imagenes/fondo.jpg"));
             naveImage = ImageIO.read(getClass().getResourceAsStream("/recursos/imagenes/nave.png"));
             enemigoImage = ImageIO.read(getClass().getResourceAsStream("/recursos/imagenes/enemigo.png"));
+            obstaculoImage = ImageIO.read(getClass().getResourceAsStream("/recursos/imagenes/obstaculo.png"));
 
             // Redimensionar imágenes
             fondoImage = fondoImage.getScaledInstance(600, 600, Image.SCALE_SMOOTH);
             naveImage = naveImage.getScaledInstance(30, 30, Image.SCALE_SMOOTH);
             enemigoImage = enemigoImage.getScaledInstance(30, 30, Image.SCALE_SMOOTH);
+            obstaculoImage = obstaculoImage.getScaledInstance(30, 30, Image.SCALE_SMOOTH);
 
         } catch (IOException e) {
             System.out.println("Error al cargar las imágenes: " + e.getMessage());
@@ -68,6 +71,16 @@ public class JuegoPanel extends JPanel {
         g.setColor(Color.YELLOW);
         for (Disparo disparo : modelo.getDisparos()) {
             g.fillRect(disparo.getX(), disparo.getY(), 5, 10);
+        }
+
+        //Dibuja los obstaculos
+        for (Obstaculo obstaculo : modelo.getObstaculos()) {
+            if (obstaculoImage != null) {
+                g.drawImage(obstaculoImage, obstaculo.getX(), obstaculo.getY(), this);
+            } else {
+                g.setColor(Color.RED);
+                g.fillRect(obstaculo.getX(), obstaculo.getY(), 40, 40); // Tamaño del obstáculo
+            }
         }
 
         // Dibuja la información del juego
