@@ -52,8 +52,11 @@ public class DetectorColisionesThread extends Thread {
             for (DisparoEnemigo disparo : juego.getDisparosEnemigos()) {
                 if (colision(disparo.getBounds(), juego.getNave().getBounds())) {
                     juego.getDisparosEnemigos().remove(disparo);
-                    juego.perderVida();
-                    System.out.println("Vidas restantes: " + juego.getVidas());
+                    if (!juego.getNave().tieneEscudo()) {
+                        juego.perderVida();
+                        // Activar escudo temporal después de perder una vida
+                        juego.getNave().activarEscudo();
+                    }
                     break;
                 }
             }

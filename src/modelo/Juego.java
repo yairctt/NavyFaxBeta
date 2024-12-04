@@ -25,6 +25,7 @@ public class Juego {
     private MovimientoObstaculosThread hiloObstaculos;
     private DisparosEnemigosThread hiloDisparosEnemigos;
     private MovimientoDisparosEnemigosThread hiloMovimientoDisparosEnemigos;
+    private ActualizacionEscudoThread hiloEscudo;
     private boolean jugadorVivo;
     private int vidas;
     private Image iconoVida;
@@ -32,7 +33,7 @@ public class Juego {
 
 
     public Juego() {
-        vidas = 5;
+        vidas = 10;
         nave = new Nave(300, 500);
         enemigos = new CopyOnWriteArrayList<>();
         disparos = new CopyOnWriteArrayList<>();
@@ -98,7 +99,6 @@ public class Juego {
         if (enemigos.isEmpty() && jugadorVivo) {
             nivel++;
             inicializarEnemigos();
-            inicializarObstaculos();
         }
     }
 
@@ -132,6 +132,7 @@ public class Juego {
         hiloObstaculos = new MovimientoObstaculosThread(this);
         hiloDisparosEnemigos = new DisparosEnemigosThread(this);
         hiloMovimientoDisparosEnemigos = new MovimientoDisparosEnemigosThread(this);
+        hiloEscudo = new ActualizacionEscudoThread(this);
 
 
         hiloDisparosEnemigos.start();
@@ -140,6 +141,7 @@ public class Juego {
         hiloColisiones.start();
         hiloObstaculos.start();
         hiloMovimientoDisparosEnemigos.start();
+        hiloEscudo.start();
     }
 
     public void detenerHilos() {
@@ -150,6 +152,7 @@ public class Juego {
         hiloDisparosEnemigos.detener();
         hiloMovimientoDisparosEnemigos.detener();
         soundManager.detenerMusica();
+        hiloEscudo.detener();
     }
 
     public void disparoEnemigo(int x, int y) {

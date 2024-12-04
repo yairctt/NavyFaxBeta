@@ -15,6 +15,7 @@ public class JuegoPanel extends JPanel {
     private Image naveImage;
     private Image enemigoImage;
     private Image obstaculoImage;
+    private Image escudoImage;
     private Image[] framesExplosion;
     private Map<Point, Integer> animacionesExplosion;
     private static final int TOTAL_FRAMES = 8;
@@ -35,8 +36,7 @@ public class JuegoPanel extends JPanel {
             naveImage = ImageIO.read(getClass().getResourceAsStream("/recursos/imagenes/nave.png"));
             enemigoImage = ImageIO.read(getClass().getResourceAsStream("/recursos/imagenes/enemigo.png"));
             obstaculoImage = ImageIO.read(getClass().getResourceAsStream("/recursos/imagenes/obstaculo.png"));
-
-            // Cargar la imagen de explosión
+            escudoImage = ImageIO.read(getClass().getResourceAsStream("/recursos/imagenes/escudo.png"));
             Image explosionImage = ImageIO.read(getClass().getResourceAsStream("/recursos/imagenes/explosion.png"));
 
             // Redimensionar imágenes
@@ -44,6 +44,7 @@ public class JuegoPanel extends JPanel {
             naveImage = naveImage.getScaledInstance(30, 30, Image.SCALE_SMOOTH);
             enemigoImage = enemigoImage.getScaledInstance(30, 30, Image.SCALE_SMOOTH);
             obstaculoImage = obstaculoImage.getScaledInstance(30, 30, Image.SCALE_SMOOTH);
+            escudoImage = escudoImage.getScaledInstance(40, 40, Image.SCALE_SMOOTH);
 
             // Inicializar el array con la misma imagen
             framesExplosion = new Image[TOTAL_FRAMES];
@@ -106,6 +107,30 @@ public class JuegoPanel extends JPanel {
         } else {
             g.setColor(Color.GREEN);
             g.fillRect(nave.getX(), nave.getY(), 30, 30);
+        }
+        if (nave.tieneEscudo()) {
+            // Dibujar efecto de escudo
+            g.setColor(new Color(0, 255, 255, 128));
+            g.fillOval(nave.getX() - 5, nave.getY() - 5, 40, 40);
+
+            // Dibujar barra de duración del escudo
+            int barraAncho = 50;
+            int barraAlto = 5;
+            int barraX = nave.getX() - 10;
+            int barraY = nave.getY() - 10;
+
+            // Fondo de la barra
+            g.setColor(new Color(60, 60, 60));
+            g.fillRect(barraX, barraY, barraAncho, barraAlto);
+
+            // Parte llena de la barra
+            g.setColor(new Color(0, 191, 255));
+            int anchoLleno = (int)(barraAncho * nave.getPorcentajeEscudoRestante());
+            g.fillRect(barraX, barraY, anchoLleno, barraAlto);
+
+            // Borde de la barra
+            g.setColor(Color.WHITE);
+            g.drawRect(barraX, barraY, barraAncho, barraAlto);
         }
 
         // Dibuja los enemigos
