@@ -21,7 +21,8 @@ public class MovimientoEnemigosThread extends Thread {
                 enemigo.mover();
             }
             try {
-                Thread.sleep(50 - (juego.getNivel() * 10));
+                int tiempoEspera = Math.max(20, 50 - (juego.getNivel() * 3));
+                Thread.sleep(tiempoEspera);
             } catch (InterruptedException e) {
                 System.out.println(Thread.currentThread().getName() + " interrumpido");
             }

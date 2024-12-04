@@ -28,6 +28,11 @@ public class Enemigo {
                 y += 20; // Baja una línea
             }
         }
+
+        // Para evitar que los enemigos bajen infinitamente
+        if (y > 500) {
+            y = 50; // Volver arriba si llegan muy abajo
+        }
     }
 
     public Rectangle getBounds() {

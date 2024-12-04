@@ -1,9 +1,13 @@
 package modelo;
 
 
+import java.awt.*;
+import java.io.IOException;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import modelo.threads.*;
+
+import javax.imageio.ImageIO;
 
 public class Juego {
     private Nave nave;
@@ -21,8 +25,13 @@ public class Juego {
     private DisparosEnemigosThread hiloDisparosEnemigos;
     private MovimientoDisparosEnemigosThread hiloMovimientoDisparosEnemigos;
     private boolean jugadorVivo;
+    private int vidas;
+    private Image iconoVida;
+    private int velocidadEnemigos;
+    private int frecuenciaDisparo;
 
     public Juego() {
+        vidas = 3;
         nave = new Nave(300, 500);
         enemigos = new CopyOnWriteArrayList<>();
         disparos = new CopyOnWriteArrayList<>();
@@ -32,21 +41,63 @@ public class Juego {
         puntuacion = 0;
         juegoActivo = true;
         jugadorVivo = true;
+        cargarIconoVida();
         inicializarEnemigos();
         iniciarHilos();
         inicializarObstaculos();
     }
 
+    private void cargarIconoVida() {
+        try {
+            iconoVida = ImageIO.read(getClass().getResourceAsStream("/recursos/imagenes/vida.png"))
+                    .getScaledInstance(20, 20, Image.SCALE_SMOOTH);
+        } catch (IOException e) {
+            System.out.println("Error al cargar icono de vida: " + e.getMessage());
+        }
+    }
+
+    public void perderVida() {
+        vidas--;
+        if (vidas <= 0) {
+            eliminarJugador();
+        } else {
+            // Reiniciar posición de la nave y limpiar disparos enemigos
+            nave = new Nave(300, 500);
+            disparosEnemigos.clear();
+        }
+    }
+
+    public int getVidas() {
+        return vidas;
+    }
+
+    public Image getIconoVida() {
+        return iconoVida;
+    }
+
+    public void verificarNivel() {
+        if (enemigos.isEmpty() && jugadorVivo) {
+            nivel++;
+            inicializarEnemigos();
+            inicializarObstaculos();
+        }
+    }
+
+
+
     private void inicializarObstaculos() {
         obstaculos.clear();
 
-        for (int i = 0; i < nivel * 5; i++) {
-            obstaculos.add(new Obstaculo(100 + i * 120, 300 + (i % 2) * 50));  // Ejemplo de obstáculos distribuidos
+        int numeroObstaculos = 5 + (nivel + 1);
+        for (int i = 0; i < numeroObstaculos ; i++) {
+            obstaculos.add(new Obstaculo(100 + i * 120, 300 + (i % 2) * 50));// Ejemplo de obstáculos distribuidos
+            System.out.println("Oobstaculos iniciados");
         }
     }
 
     private void inicializarEnemigos() {
         enemigos.clear();
+        System.out.println("Enemigos iniciados");
         int numeroEnemigos = 5 + (nivel * 2);
         int velocidad = 1 + nivel;
 
@@ -98,17 +149,6 @@ public class Juego {
         juegoActivo = false;
     }
 
-    public void verificarNivel() {
-        if (enemigos.isEmpty()) {
-            nivel++;
-            if (nivel <= 3) {
-                inicializarEnemigos();
-            } else {
-                juegoActivo = false;
-                detenerHilos();
-            }
-        }
-    }
 
     // Getters y setters
     public Nave getNave() { return nave; }

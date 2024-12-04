@@ -89,6 +89,16 @@ public class JuegoPanel extends JPanel {
         g.drawString("Nivel: " + modelo.getNivel(), 10, 25);
         g.drawString("Puntuación: " + modelo.getPuntuacion(), 10, 50);
 
+        Image iconoVida = modelo.getIconoVida();
+        if (iconoVida != null) {
+            for (int i = 0; i < modelo.getVidas(); i++) {
+                g.drawImage(iconoVida, 10 + (i * 25), 60, this);
+            }
+        } else {
+            // Alternativa si no hay icono
+            g.drawString("Vidas: " + modelo.getVidas(), 10, 75);
+        }
+
         // Dibujar disparos enemigos
         g.setColor(Color.RED);
         for (DisparoEnemigo disparo : modelo.getDisparosEnemigos()) {
@@ -108,6 +118,10 @@ public class JuegoPanel extends JPanel {
             int y = getHeight() / 2;
 
             g.drawString(mensaje, x, y);
+
+            String puntuacionFinal = "Puntuación Final: " + modelo.getPuntuacion();
+            int puntajeAncho = fm.stringWidth(puntuacionFinal);
+            g.drawString(puntuacionFinal, (getWidth() - puntajeAncho) / 2, y + 50);
         }
     }
 }
