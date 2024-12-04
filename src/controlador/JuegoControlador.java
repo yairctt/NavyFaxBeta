@@ -9,6 +9,7 @@ public class JuegoControlador implements KeyListener, WindowListener {
     private Juego modelo;
     private JuegoPanel vista;
     private Timer timerRepintado;
+    private JFrame frame;
 
     public JuegoControlador(Juego modelo, JuegoPanel vista) {
         this.modelo = modelo;
@@ -18,7 +19,7 @@ public class JuegoControlador implements KeyListener, WindowListener {
         timerRepintado = new Timer(16, e -> vista.repaint());
         timerRepintado.start();
 
-        JFrame frame = new JFrame("NavyFax");
+        frame = new JFrame("NavyFax");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.add(vista);
         frame.pack();
@@ -26,11 +27,13 @@ public class JuegoControlador implements KeyListener, WindowListener {
         frame.addKeyListener(this);
         frame.addWindowListener(this);
         frame.setVisible(true);
+        frame.setResizable(false); // Opcional: evitar que se pueda redimensionar
     }
 
     @Override
     public void windowClosing(WindowEvent e) {
         modelo.detenerHilos();
+        vista.detener(); // Detener el timer de animación
         timerRepintado.stop();
     }
 
@@ -44,16 +47,18 @@ public class JuegoControlador implements KeyListener, WindowListener {
 
     @Override
     public void keyPressed(KeyEvent e) {
-        switch (e.getKeyCode()) {
-            case KeyEvent.VK_LEFT:
-                modelo.getNave().moverIzquierda();
-                break;
-            case KeyEvent.VK_RIGHT:
-                modelo.getNave().moverDerecha();
-                break;
-            case KeyEvent.VK_SPACE:
-                modelo.disparar();
-                break;
+        if (modelo.isJugadorVivo() && modelo.isJuegoActivo()) {  // Solo procesar teclas si el juego está activo
+            switch (e.getKeyCode()) {
+                case KeyEvent.VK_LEFT:
+                    modelo.getNave().moverIzquierda();
+                    break;
+                case KeyEvent.VK_RIGHT:
+                    modelo.getNave().moverDerecha();
+                    break;
+                case KeyEvent.VK_SPACE:
+                    modelo.disparar();
+                    break;
+            }
         }
     }
 
@@ -68,4 +73,3 @@ public class JuegoControlador implements KeyListener, WindowListener {
         });
     }
 }
-

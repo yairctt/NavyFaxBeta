@@ -23,6 +23,8 @@ public class DetectorColisionesThread extends Thread {
                     if (colision(disparo.getBounds(), enemigo.getBounds())) {
                         juego.getDisparos().remove(disparo);
                         juego.getEnemigos().remove(enemigo);
+                        juego.agregarExplosion(enemigo.getX(), enemigo.getY());
+                        juego.reproducirExplosion();
                         juego.incrementarPuntuacion();
                         System.out.println(Thread.currentThread().getName() +
                                 " - ¡Colisión con enemigo detectada! Puntuación: " +

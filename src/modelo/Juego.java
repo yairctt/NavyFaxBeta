@@ -1,6 +1,6 @@
 package modelo;
 
-
+import javax.sound.sampled.*;
 import java.awt.*;
 import java.io.IOException;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -15,6 +15,7 @@ public class Juego {
     private CopyOnWriteArrayList<Disparo> disparos;
     private CopyOnWriteArrayList<Obstaculo> obstaculos;
     private CopyOnWriteArrayList<DisparoEnemigo> disparosEnemigos;
+    private CopyOnWriteArrayList<Point> explosiones;
     private int nivel;
     private int puntuacion;
     private boolean juegoActivo;
@@ -27,16 +28,17 @@ public class Juego {
     private boolean jugadorVivo;
     private int vidas;
     private Image iconoVida;
-    private int velocidadEnemigos;
-    private int frecuenciaDisparo;
+    private SoundManager soundManager;
+
 
     public Juego() {
-        vidas = 3;
+        vidas = 5;
         nave = new Nave(300, 500);
         enemigos = new CopyOnWriteArrayList<>();
         disparos = new CopyOnWriteArrayList<>();
         obstaculos = new CopyOnWriteArrayList<>();
         disparosEnemigos = new CopyOnWriteArrayList<>();
+        explosiones = new CopyOnWriteArrayList<>();
         nivel = 1;
         puntuacion = 0;
         juegoActivo = true;
@@ -45,6 +47,20 @@ public class Juego {
         inicializarEnemigos();
         iniciarHilos();
         inicializarObstaculos();
+        soundManager = new SoundManager();
+        soundManager.iniciarMusicaFondo();
+    }
+
+    public void agregarExplosion(int x, int y) {
+        explosiones.add(new Point(x, y));
+    }
+
+    public void removerExplosion(Point explosion) {
+        explosiones.remove(explosion);
+    }
+
+    public CopyOnWriteArrayList<Point> getExplosiones() {
+        return explosiones;
     }
 
     private void cargarIconoVida() {
@@ -59,9 +75,12 @@ public class Juego {
     public void perderVida() {
         vidas--;
         if (vidas <= 0) {
+            soundManager.reproducirGameOver();
+            soundManager.detenerMusica();
             eliminarJugador();
         } else {
             // Reiniciar posición de la nave y limpiar disparos enemigos
+            soundManager.reproducirDaño();
             nave = new Nave(300, 500);
             disparosEnemigos.clear();
         }
@@ -130,6 +149,7 @@ public class Juego {
         hiloObstaculos.detener();
         hiloDisparosEnemigos.detener();
         hiloMovimientoDisparosEnemigos.detener();
+        soundManager.detenerMusica();
     }
 
     public void disparoEnemigo(int x, int y) {
@@ -162,6 +182,12 @@ public class Juego {
 
     public void disparar() {
         disparos.add(new Disparo(nave.getX() + 15, nave.getY()));
+        soundManager.reproducirDisparo();
     }
+
+    public void reproducirExplosion() {
+        soundManager.reproducirExplosion();
+    }
+
 }
 

@@ -5,6 +5,9 @@ import javax.swing.*;
 import java.awt.*;
 import javax.imageio.ImageIO;
 import java.io.IOException;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.Iterator;
 
 public class JuegoPanel extends JPanel {
     private Juego modelo;
@@ -12,11 +15,17 @@ public class JuegoPanel extends JPanel {
     private Image naveImage;
     private Image enemigoImage;
     private Image obstaculoImage;
+    private Image[] framesExplosion;
+    private Map<Point, Integer> animacionesExplosion;
+    private static final int TOTAL_FRAMES = 8;
+    private Timer timerAnimacion;
 
     public JuegoPanel(Juego modelo) {
         this.modelo = modelo;
         setPreferredSize(new Dimension(600, 600));
+        this.animacionesExplosion = new HashMap<>();
         cargarImagenes();
+        iniciarTimerAnimacion();
     }
 
     private void cargarImagenes() {
@@ -27,16 +36,58 @@ public class JuegoPanel extends JPanel {
             enemigoImage = ImageIO.read(getClass().getResourceAsStream("/recursos/imagenes/enemigo.png"));
             obstaculoImage = ImageIO.read(getClass().getResourceAsStream("/recursos/imagenes/obstaculo.png"));
 
+            // Cargar la imagen de explosión
+            Image explosionImage = ImageIO.read(getClass().getResourceAsStream("/recursos/imagenes/explosion.png"));
+
             // Redimensionar imágenes
             fondoImage = fondoImage.getScaledInstance(600, 600, Image.SCALE_SMOOTH);
             naveImage = naveImage.getScaledInstance(30, 30, Image.SCALE_SMOOTH);
             enemigoImage = enemigoImage.getScaledInstance(30, 30, Image.SCALE_SMOOTH);
             obstaculoImage = obstaculoImage.getScaledInstance(30, 30, Image.SCALE_SMOOTH);
 
+            // Inicializar el array con la misma imagen
+            framesExplosion = new Image[TOTAL_FRAMES];
+            for(int i = 0; i < TOTAL_FRAMES; i++) {
+                framesExplosion[i] = explosionImage.getScaledInstance(40, 40, Image.SCALE_SMOOTH);
+            }
+
         } catch (IOException e) {
             System.out.println("Error al cargar las imágenes: " + e.getMessage());
             e.printStackTrace();
         }
+    }
+
+    private void iniciarTimerAnimacion() {
+        timerAnimacion = new Timer(50, e -> {
+            boolean hayAnimaciones = false;
+
+            // Actualizar frames de explosiones existentes
+            Iterator<Map.Entry<Point, Integer>> it = animacionesExplosion.entrySet().iterator();
+            while (it.hasNext()) {
+                Map.Entry<Point, Integer> entry = it.next();
+                int frameActual = entry.getValue();
+                if (frameActual >= TOTAL_FRAMES - 1) {
+                    it.remove();
+                    modelo.removerExplosion(entry.getKey());
+                } else {
+                    animacionesExplosion.put(entry.getKey(), frameActual + 1);
+                    hayAnimaciones = true;
+                }
+            }
+
+            // Agregar nuevas explosiones
+            for (Point explosion : modelo.getExplosiones()) {
+                if (!animacionesExplosion.containsKey(explosion)) {
+                    animacionesExplosion.put(explosion, 0);
+                    hayAnimaciones = true;
+                }
+            }
+
+            if (hayAnimaciones) {
+                repaint();
+            }
+        });
+        timerAnimacion.start();
     }
 
     @Override
@@ -83,6 +134,15 @@ public class JuegoPanel extends JPanel {
             }
         }
 
+        // Dibujar explosiones
+        for (Map.Entry<Point, Integer> entry : animacionesExplosion.entrySet()) {
+            Point pos = entry.getKey();
+            int frame = entry.getValue();
+            if (frame < TOTAL_FRAMES && framesExplosion[frame] != null) {
+                g.drawImage(framesExplosion[frame], pos.x, pos.y, this);
+            }
+        }
+
         // Dibuja la información del juego
         g.setColor(Color.WHITE);
         g.setFont(new Font("Arial", Font.BOLD, 20));
@@ -95,7 +155,6 @@ public class JuegoPanel extends JPanel {
                 g.drawImage(iconoVida, 10 + (i * 25), 60, this);
             }
         } else {
-            // Alternativa si no hay icono
             g.drawString("Vidas: " + modelo.getVidas(), 10, 75);
         }
 
@@ -105,13 +164,12 @@ public class JuegoPanel extends JPanel {
             g.fillRect(disparo.getX(), disparo.getY(), 5, 10);
         }
 
-        // Mensaje de fin de juego - unificado para ambos casos
+        // Mensaje de fin de juego
         if (!modelo.isJugadorVivo() || !modelo.isJuegoActivo()) {
             g.setColor(Color.RED);
             g.setFont(new Font("Arial", Font.BOLD, 30));
             String mensaje = !modelo.isJugadorVivo() ? "¡GAME OVER!" : "¡JUEGO TERMINADO!";
 
-            // Calcular posición para centrar el texto
             FontMetrics fm = g.getFontMetrics();
             int mensajeAncho = fm.stringWidth(mensaje);
             int x = (getWidth() - mensajeAncho) / 2;
@@ -122,6 +180,12 @@ public class JuegoPanel extends JPanel {
             String puntuacionFinal = "Puntuación Final: " + modelo.getPuntuacion();
             int puntajeAncho = fm.stringWidth(puntuacionFinal);
             g.drawString(puntuacionFinal, (getWidth() - puntajeAncho) / 2, y + 50);
+        }
+    }
+
+    public void detener() {
+        if (timerAnimacion != null) {
+            timerAnimacion.stop();
         }
     }
 }
