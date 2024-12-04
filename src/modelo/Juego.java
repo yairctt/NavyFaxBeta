@@ -3,16 +3,14 @@ package modelo;
 
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import modelo.threads.MovimientoEnemigosThread;
-import modelo.threads.MovimientoDisparosThread;
-import modelo.threads.DetectorColisionesThread;
-import modelo.threads.MovimientoObstaculosThread;
+import modelo.threads.*;
 
 public class Juego {
     private Nave nave;
     private CopyOnWriteArrayList<Enemigo> enemigos;
     private CopyOnWriteArrayList<Disparo> disparos;
     private CopyOnWriteArrayList<Obstaculo> obstaculos;
+    private CopyOnWriteArrayList<DisparoEnemigo> disparosEnemigos;
     private int nivel;
     private int puntuacion;
     private boolean juegoActivo;
@@ -20,15 +18,20 @@ public class Juego {
     private MovimientoDisparosThread hiloDisparos;
     private DetectorColisionesThread hiloColisiones;
     private MovimientoObstaculosThread hiloObstaculos;
+    private DisparosEnemigosThread hiloDisparosEnemigos;
+    private MovimientoDisparosEnemigosThread hiloMovimientoDisparosEnemigos;
+    private boolean jugadorVivo;
 
     public Juego() {
         nave = new Nave(300, 500);
         enemigos = new CopyOnWriteArrayList<>();
         disparos = new CopyOnWriteArrayList<>();
         obstaculos = new CopyOnWriteArrayList<>();
+        disparosEnemigos = new CopyOnWriteArrayList<>();
         nivel = 1;
         puntuacion = 0;
         juegoActivo = true;
+        jugadorVivo = true;
         inicializarEnemigos();
         iniciarHilos();
         inicializarObstaculos();
@@ -57,11 +60,16 @@ public class Juego {
         hiloDisparos = new MovimientoDisparosThread(this);
         hiloColisiones = new DetectorColisionesThread(this);
         hiloObstaculos = new MovimientoObstaculosThread(this);
+        hiloDisparosEnemigos = new DisparosEnemigosThread(this);
+        hiloMovimientoDisparosEnemigos = new MovimientoDisparosEnemigosThread(this);
 
+
+        hiloDisparosEnemigos.start();
         hiloEnemigos.start();
         hiloDisparos.start();
         hiloColisiones.start();
         hiloObstaculos.start();
+        hiloMovimientoDisparosEnemigos.start();
     }
 
     public void detenerHilos() {
@@ -69,6 +77,25 @@ public class Juego {
         hiloDisparos.detener();
         hiloColisiones.detener();
         hiloObstaculos.detener();
+        hiloDisparosEnemigos.detener();
+        hiloMovimientoDisparosEnemigos.detener();
+    }
+
+    public void disparoEnemigo(int x, int y) {
+        disparosEnemigos.add(new DisparoEnemigo(x, y));
+    }
+
+    public CopyOnWriteArrayList<DisparoEnemigo> getDisparosEnemigos() {
+        return disparosEnemigos;
+    }
+
+    public boolean isJugadorVivo() {
+        return jugadorVivo;
+    }
+
+    public void eliminarJugador() {
+        jugadorVivo = false;
+        juegoActivo = false;
     }
 
     public void verificarNivel() {

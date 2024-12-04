@@ -47,6 +47,14 @@ public class DetectorColisionesThread extends Thread {
                 }
             }
 
+            for (DisparoEnemigo disparo : juego.getDisparosEnemigos()) {
+                if (colision(disparo.getBounds(), juego.getNave().getBounds())) {
+                    juego.eliminarJugador();
+                    System.out.println(Thread.currentThread().getName() + " - ¡Jugador eliminado!");
+                    break;
+                }
+            }
+
             try {
                 Thread.sleep(10);
             } catch (InterruptedException e) {

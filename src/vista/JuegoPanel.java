@@ -79,7 +79,7 @@ public class JuegoPanel extends JPanel {
                 g.drawImage(obstaculoImage, obstaculo.getX(), obstaculo.getY(), this);
             } else {
                 g.setColor(Color.RED);
-                g.fillRect(obstaculo.getX(), obstaculo.getY(), 40, 40); // Tamaño del obstáculo
+                g.fillRect(obstaculo.getX(), obstaculo.getY(), 40, 40);
             }
         }
 
@@ -89,10 +89,25 @@ public class JuegoPanel extends JPanel {
         g.drawString("Nivel: " + modelo.getNivel(), 10, 25);
         g.drawString("Puntuación: " + modelo.getPuntuacion(), 10, 50);
 
-        if (!modelo.isJuegoActivo()) {
-            g.setColor(Color.YELLOW);
+        // Dibujar disparos enemigos
+        g.setColor(Color.RED);
+        for (DisparoEnemigo disparo : modelo.getDisparosEnemigos()) {
+            g.fillRect(disparo.getX(), disparo.getY(), 5, 10);
+        }
+
+        // Mensaje de fin de juego - unificado para ambos casos
+        if (!modelo.isJugadorVivo() || !modelo.isJuegoActivo()) {
+            g.setColor(Color.RED);
             g.setFont(new Font("Arial", Font.BOLD, 30));
-            g.drawString("¡Juego Terminado!", 200, 300);
+            String mensaje = !modelo.isJugadorVivo() ? "¡GAME OVER!" : "¡JUEGO TERMINADO!";
+
+            // Calcular posición para centrar el texto
+            FontMetrics fm = g.getFontMetrics();
+            int mensajeAncho = fm.stringWidth(mensaje);
+            int x = (getWidth() - mensajeAncho) / 2;
+            int y = getHeight() / 2;
+
+            g.drawString(mensaje, x, y);
         }
     }
 }
