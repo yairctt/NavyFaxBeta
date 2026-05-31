@@ -1,6 +1,6 @@
 package modelo.threads;
 
-import modelo.*;
+import modelo.Juego;
 
 public class ActualizacionEscudoThread extends Thread {
     private Juego juego;
@@ -15,16 +15,19 @@ public class ActualizacionEscudoThread extends Thread {
     @Override
     public void run() {
         while (ejecutando && juego.isJuegoActivo()) {
-            juego.getNave().actualizarEscudo();
+            // Siempre avanza el timer de nivel completado (incluso si está pausado)
+            juego.checkAvanzarNivel();
+
+            if (!juego.isPausado()) {
+                juego.getNave().actualizarEscudo();
+            }
             try {
-                Thread.sleep(100); // Actualizar cada 100ms
+                Thread.sleep(100);
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                Thread.currentThread().interrupt();
             }
         }
     }
 
-    public void detener() {
-        ejecutando = false;
-    }
+    public void detener() { ejecutando = false; }
 }

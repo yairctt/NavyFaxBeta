@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(javac -d out -sourcepath src src/controlador/JuegoControlador.java)",
+      "Bash(xcopy \"src\\\\recursos\" \"out\\\\recursos\" /E /Y /I /Q)",
+      "PowerShell(Copy-Item *)",
+      "Bash(java -cp out controlador.JuegoControlador)"
+    ]
+  }
+}

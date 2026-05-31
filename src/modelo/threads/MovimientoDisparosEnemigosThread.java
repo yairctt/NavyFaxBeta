@@ -1,7 +1,7 @@
 package modelo.threads;
 
-import modelo.Juego;
 import modelo.DisparoEnemigo;
+import modelo.Juego;
 
 public class MovimientoDisparosEnemigosThread extends Thread {
     private Juego juego;
@@ -15,27 +15,28 @@ public class MovimientoDisparosEnemigosThread extends Thread {
 
     @Override
     public void run() {
-        System.out.println("Iniciando " + Thread.currentThread().getName());
         while (ejecutando && juego.isJuegoActivo()) {
+            esperarSiPausado();
             for (DisparoEnemigo disparo : juego.getDisparosEnemigos()) {
                 disparo.mover();
-                // Eliminar disparos que salen de la pantalla
-                if (disparo.getY() > 600) {
-                    juego.getDisparosEnemigos().remove(disparo);
-                    System.out.println(Thread.currentThread().getName() + " - Disparo enemigo eliminado");
-                }
+                if (disparo.getY() > 620) juego.getDisparosEnemigos().remove(disparo);
             }
             try {
                 Thread.sleep(20);
             } catch (InterruptedException e) {
-                System.out.println(Thread.currentThread().getName() + " interrumpido");
+                Thread.currentThread().interrupt();
             }
         }
-        System.out.println(Thread.currentThread().getName() + " finalizado");
     }
 
-    public void detener() {
-        System.out.println("Deteniendo " + Thread.currentThread().getName());
-        ejecutando = false;
+    private void esperarSiPausado() {
+        while ((juego.isPausado() || juego.isNivelCompletado()) && ejecutando) {
+            try { Thread.sleep(50); } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                return;
+            }
+        }
     }
+
+    public void detener() { ejecutando = false; }
 }

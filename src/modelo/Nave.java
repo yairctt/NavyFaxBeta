@@ -7,12 +7,18 @@ public class Nave {
     private static final int VELOCIDAD = 10;
     private boolean escudoActivo;
     private long tiempoInicioEscudo;
-    private static final int DURACION_ESCUDO = 10;
+    private static final int DURACION_ESCUDO = 3000; // 3 segundos
+
+    public enum TipoDisparo { SIMPLE, DOBLE, TRIPLE }
+    private TipoDisparo tipoDisparo = TipoDisparo.SIMPLE;
+    private long tiempoInicioDisparoEspecial;
+    private static final int DURACION_POWER_UP_DISPARO = 10000; // 10 segundos
 
     public Nave(int x, int y) {
         this.x = x;
         this.y = y;
         this.escudoActivo = false;
+        this.tipoDisparo = TipoDisparo.SIMPLE;
     }
 
     public void activarEscudo() {
@@ -21,25 +27,33 @@ public class Nave {
     }
 
     public void actualizarEscudo() {
-        if (escudoActivo) {
-            long tiempoActual = System.currentTimeMillis();
-            if (tiempoActual - tiempoInicioEscudo > DURACION_ESCUDO) {
-                escudoActivo = false;
-            }
+        if (escudoActivo && System.currentTimeMillis() - tiempoInicioEscudo > DURACION_ESCUDO) {
+            escudoActivo = false;
+        }
+        if (tipoDisparo != TipoDisparo.SIMPLE
+                && System.currentTimeMillis() - tiempoInicioDisparoEspecial > DURACION_POWER_UP_DISPARO) {
+            tipoDisparo = TipoDisparo.SIMPLE;
         }
     }
 
-    public boolean tieneEscudo() {
-        return escudoActivo;
+    public void activarDisparoDoble() {
+        tipoDisparo = TipoDisparo.DOBLE;
+        tiempoInicioDisparoEspecial = System.currentTimeMillis();
     }
+
+    public void activarDisparoTriple() {
+        tipoDisparo = TipoDisparo.TRIPLE;
+        tiempoInicioDisparoEspecial = System.currentTimeMillis();
+    }
+
+    public TipoDisparo getTipoDisparo() { return tipoDisparo; }
+
+    public boolean tieneEscudo() { return escudoActivo; }
 
     public double getPorcentajeEscudoRestante() {
         if (!escudoActivo) return 0;
-
-        long tiempoActual = System.currentTimeMillis();
-        long tiempoTranscurrido = tiempoActual - tiempoInicioEscudo;
-        double porcentaje = 1.0 - ((double)tiempoTranscurrido / DURACION_ESCUDO);
-        return Math.max(0, Math.min(1, porcentaje)); // Asegurar que esté entre 0 y 1
+        long elapsed = System.currentTimeMillis() - tiempoInicioEscudo;
+        return Math.max(0, 1.0 - ((double) elapsed / DURACION_ESCUDO));
     }
 
     public void moverIzquierda() {
@@ -57,4 +71,3 @@ public class Nave {
     public int getX() { return x; }
     public int getY() { return y; }
 }
-

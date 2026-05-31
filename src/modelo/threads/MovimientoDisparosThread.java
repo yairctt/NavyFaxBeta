@@ -1,41 +1,42 @@
 package modelo.threads;
-import modelo.*;
+
+import modelo.Disparo;
+import modelo.Juego;
 
 public class MovimientoDisparosThread extends Thread {
     private Juego juego;
     private volatile boolean ejecutando;
 
     public MovimientoDisparosThread(Juego juego) {
-        super("Hilo-Disparos"); // nombre del hilo
+        super("Hilo-Disparos");
         this.juego = juego;
         this.ejecutando = true;
     }
 
     @Override
     public void run() {
-        System.out.println("Iniciando " + Thread.currentThread().getName());
         while (ejecutando && juego.isJuegoActivo()) {
-            if (!juego.getDisparos().isEmpty()) {
-                System.out.println(Thread.currentThread().getName() + " - Moviendo " + juego.getDisparos().size() + " disparos");
-            }
+            esperarSiPausado();
             for (Disparo disparo : juego.getDisparos()) {
                 disparo.mover();
-                if (disparo.getY() < 0) {
-                    juego.getDisparos().remove(disparo);
-                    System.out.println(Thread.currentThread().getName() + " - Disparo eliminado fuera de pantalla");
-                }
+                if (disparo.getY() < 0) juego.getDisparos().remove(disparo);
             }
             try {
                 Thread.sleep(20);
             } catch (InterruptedException e) {
-                System.out.println(Thread.currentThread().getName() + " interrumpido");
+                Thread.currentThread().interrupt();
             }
         }
-        System.out.println(Thread.currentThread().getName() + " finalizado");
     }
 
-    public void detener() {
-        System.out.println("Deteniendo " + Thread.currentThread().getName());
-        ejecutando = false;
+    private void esperarSiPausado() {
+        while ((juego.isPausado() || juego.isNivelCompletado()) && ejecutando) {
+            try { Thread.sleep(50); } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                return;
+            }
+        }
     }
+
+    public void detener() { ejecutando = false; }
 }

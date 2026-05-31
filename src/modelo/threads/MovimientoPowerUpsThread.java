@@ -1,34 +1,28 @@
 package modelo.threads;
 
-import modelo.Enemigo;
 import modelo.Juego;
-import java.util.Random;
+import modelo.PowerUp;
 
-public class DisparosEnemigosThread extends Thread {
+public class MovimientoPowerUpsThread extends Thread {
     private Juego juego;
     private volatile boolean ejecutando;
-    private Random random;
 
-    public DisparosEnemigosThread(Juego juego) {
-        super("Hilo-Disparos-Enemigos");
+    public MovimientoPowerUpsThread(Juego juego) {
+        super("Hilo-PowerUps");
         this.juego = juego;
         this.ejecutando = true;
-        this.random = new Random();
     }
 
     @Override
     public void run() {
         while (ejecutando && juego.isJuegoActivo()) {
             esperarSiPausado();
-            int probabilidad = Math.min(85, (int)((10 + juego.getNivel() * 8) * juego.getMultiplicadorDisparo()));
-            for (Enemigo enemigo : juego.getEnemigos()) {
-                if (random.nextInt(100) < probabilidad) {
-                    int cx = enemigo.getX() + enemigo.getBounds().width / 2;
-                    juego.disparoEnemigo(cx - 2, enemigo.getY() + enemigo.getBounds().height);
-                }
+            for (PowerUp p : juego.getPowerUps()) {
+                p.mover();
+                if (p.getY() > 620) juego.getPowerUps().remove(p);
             }
             try {
-                Thread.sleep(1000);
+                Thread.sleep(30);
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }
